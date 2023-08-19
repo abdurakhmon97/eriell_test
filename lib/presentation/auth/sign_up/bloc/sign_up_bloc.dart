@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:eriell/data/hive/credentials_hive_object.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 
 part 'sign_up_event.dart';
 
@@ -13,11 +15,13 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<OnNameChangedEvent>(_onNameChanged);
     on<OnPasswordChangedEvent>(_onPasswordChanged);
     on<OnRepeatPasswordChangedEvent>(_onRepeatPasswordChanged);
+    on<OnCreateProfileEvent>(_onCreateProfile);
   }
 
   bool get isButtonEnabled =>
       _isValidName && _isValidPassword && _isValidRepeatPassword;
 
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool _isValidRepeatPassword = false;
@@ -26,6 +30,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
 
   @override
   Future<void> close() {
+    usernameController.dispose();
     passwordController.dispose();
     return super.close();
   }
@@ -58,5 +63,23 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       _isValidRepeatPassword = true;
     }
     emit(RepeatPasswordStatusState(_isValidRepeatPassword));
+  }
+
+  FutureOr<void> _onCreateProfile(
+      OnCreateProfileEvent event, Emitter<SignUpState> emit) async {
+    final db = Hive.box<CredentialsHiveObject>('users');
+    for (var element in db.values) {
+      if (usernameController.text == element.username) {
+        emit(const CreateProfileState(true));
+        return;
+      }
+    }
+    await db.add(
+      CredentialsHiveObject(
+        username: usernameController.text,
+        password: passwordController.text,
+      ),
+    );
+    emit(const CreateProfileState(false));
   }
 }

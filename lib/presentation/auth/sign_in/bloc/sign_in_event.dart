@@ -24,3 +24,10 @@ class OnPasswordChangedEvent extends SignInEvent {
   @override
   List<Object> get props => [value];
 }
+
+class OnCheckCredentialsEvent extends SignInEvent {
+  const OnCheckCredentialsEvent();
+
+  @override
+  List<Object> get props => [];
+}

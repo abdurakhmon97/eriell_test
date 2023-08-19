@@ -18,90 +18,109 @@ class SignUpPage extends StatelessWidget {
       appBar: const EriellAppBar(title: "Sign up"),
       body: BlocProvider(
         create: (_) => SignUpBloc(),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(height: 80),
-              Text(
-                "Eriell Membership",
-                style: AppStyle.interW700x20WBlack,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Please, sign up to become a member!",
-                style: AppStyle.interW500x12WGrey,
-              ),
-              const SizedBox(height: 24),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                builder: (context, state) {
-                  bool isValidName = true;
-                  if (state is NameStatusState) {
-                    isValidName = state.isValidName;
-                  }
-                  return EriellTextField(
-                    hintText: "Username or login",
-                    onChanged: (String value) =>
-                        BlocProvider.of<SignUpBloc>(context).add(
-                      OnNameChangedEvent(value),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    error: isValidName ? null : "Must be at least 4 characters",
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                builder: (context, state) {
-                  final bloc = context.read<SignUpBloc>();
-                  bool isValidPassword = true;
-                  if (state is PasswordStatusState) {
-                    isValidPassword = state.isValidPassword;
-                  }
-                  return EriellPasswordTextField(
-                    hintText: "Password",
-                    controller: bloc.passwordController,
-                    onChanged: (String value) =>
-                        BlocProvider.of<SignUpBloc>(context).add(
-                      OnPasswordChangedEvent(value),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    error: isValidPassword
-                        ? null
-                        : "Must be at least 6 characters",
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                builder: (context, state) {
-                  bool isSamePassword = true;
-                  if (state is RepeatPasswordStatusState) {
-                    isSamePassword = state.isSamePassword;
-                  }
-                  return EriellPasswordTextField(
-                    hintText: "Repeat password",
-                    onChanged: (String value) =>
-                        BlocProvider.of<SignUpBloc>(context).add(
-                      OnRepeatPasswordChangedEvent(value),
-                    ),
-                    error:
-                        isSamePassword ? null : "Must be the same as password",
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              BlocBuilder<SignUpBloc, SignUpState>(
-                builder: (context, state) {
-                  final bloc = context.read<SignUpBloc>();
-                  return EriellButton(
-                    isActive: bloc.isButtonEnabled,
-                    onPressed: () => context.go(Routes.home),
-                    title: "Sign in",
-                  );
-                },
-              ),
-            ],
+        child: BlocListener<SignUpBloc, SignUpState>(
+          listener: (context, state) {
+            if (state is CreateProfileState && !state.usernameAlreadyExists) {
+              context.go(Routes.home);
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 80),
+                Text(
+                  "Eriell Membership",
+                  style: AppStyle.interW700x20WBlack,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Please, sign up to become a member!",
+                  style: AppStyle.interW500x12WGrey,
+                ),
+                const SizedBox(height: 24),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  builder: (context, state) {
+                    final bloc = context.read<SignUpBloc>();
+                    bool isValidName = true;
+                    bool isUsernameTaken = false;
+                    if (state is NameStatusState) {
+                      isValidName = state.isValidName;
+                    } else if (state is CreateProfileState &&
+                        state.usernameAlreadyExists) {
+                      isUsernameTaken = true;
+                    }
+                    final errorText = isValidName
+                        ? isUsernameTaken
+                            ? 'Username is already taken'
+                            : null
+                        : "Must be at least 4 characters";
+                    return EriellTextField(
+                      controller: bloc.usernameController,
+                      hintText: "Username or login",
+                      onChanged: (String value) =>
+                          BlocProvider.of<SignUpBloc>(context).add(
+                        OnNameChangedEvent(value),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      error: errorText,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  builder: (context, state) {
+                    final bloc = context.read<SignUpBloc>();
+                    bool isValidPassword = true;
+                    if (state is PasswordStatusState) {
+                      isValidPassword = state.isValidPassword;
+                    }
+                    return EriellPasswordTextField(
+                      hintText: "Password",
+                      controller: bloc.passwordController,
+                      onChanged: (String value) =>
+                          BlocProvider.of<SignUpBloc>(context).add(
+                        OnPasswordChangedEvent(value),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      error: isValidPassword
+                          ? null
+                          : "Must be at least 6 characters",
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  builder: (context, state) {
+                    bool isSamePassword = true;
+                    if (state is RepeatPasswordStatusState) {
+                      isSamePassword = state.isSamePassword;
+                    }
+                    return EriellPasswordTextField(
+                      hintText: "Repeat password",
+                      onChanged: (String value) =>
+                          BlocProvider.of<SignUpBloc>(context).add(
+                        OnRepeatPasswordChangedEvent(value),
+                      ),
+                      error: isSamePassword
+                          ? null
+                          : "Must be the same as password",
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                BlocBuilder<SignUpBloc, SignUpState>(
+                  builder: (context, state) {
+                    final bloc = context.read<SignUpBloc>();
+                    return EriellButton(
+                      isActive: bloc.isButtonEnabled,
+                      onPressed: () => bloc.add(const OnCreateProfileEvent()),
+                      title: "Sign up",
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

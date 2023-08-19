@@ -35,3 +35,12 @@ class RepeatPasswordStatusState extends SignUpState {
   @override
   List<Object> get props => [isSamePassword];
 }
+
+class CreateProfileState extends SignUpState {
+  final bool usernameAlreadyExists;
+
+  const CreateProfileState(this.usernameAlreadyExists);
+
+  @override
+  List<Object> get props => [usernameAlreadyExists];
+}

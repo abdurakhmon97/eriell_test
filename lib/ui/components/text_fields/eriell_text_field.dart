@@ -8,6 +8,7 @@ class EriellTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
 
   const EriellTextField({
     Key? key,
@@ -16,6 +17,7 @@ class EriellTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.error,
     this.onChanged,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -27,6 +29,7 @@ class _EriellTextFieldState extends State<EriellTextField> {
   Widget build(BuildContext context) {
     return TextField(
       textInputAction: widget.textInputAction,
+      controller: widget.controller,
       onChanged: (v) {
         if (v.isNotEmpty) {
           setState(() {});

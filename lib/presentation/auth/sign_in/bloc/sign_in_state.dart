@@ -26,3 +26,12 @@ class PasswordStatusState extends SignInState {
   @override
   List<Object> get props => [isValidPassword];
 }
+
+class CredentialsStatusState extends SignInState {
+  final bool userExists;
+
+  const CredentialsStatusState(this.userExists);
+
+  @override
+  List<Object> get props => [userExists];
+}

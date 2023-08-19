@@ -33,3 +33,10 @@ class OnRepeatPasswordChangedEvent extends SignUpEvent {
   @override
   List<Object> get props => [value];
 }
+
+class OnCreateProfileEvent extends SignUpEvent {
+  const OnCreateProfileEvent();
+
+  @override
+  List<Object> get props => [];
+}
